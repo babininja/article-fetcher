@@ -10,11 +10,11 @@ use Illuminate\Console\Command;
 
 class FetchArticleCommand extends Command
 {
-    private $limit = 100;
+    private int $limit = 100;
 
     /**
      * The name and signature of the console command.
-     * Providers should separate with comma example: "newsapi,nyt".
+     * Providers should separate with comma example: "newsapi,nyt,...".
      *
      * @var string
      */
@@ -53,6 +53,9 @@ class FetchArticleCommand extends Command
         } catch (InvalidFormatException $exception) {
             report($exception);
             $this->error(__('messages.errors.invalid_date'));
+            return Command::FAILURE;
+        } catch (\Throwable $exception) {
+            report($exception);
             return Command::FAILURE;
         }
 
