@@ -1,0 +1,120 @@
+<?php
+
+namespace {{ namespace }};
+
+use {{ rootNamespace }}Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+class {{ class }} extends Controller
+{
+
+    /**
+     * @var UserRepositoryInterface
+     */
+    public UserRepositoryInterface $repo;
+
+    /**
+     * @param UserRepositoryInterface $repo
+     */
+    public function __construct(UserRepositoryInterface $repo)
+    {
+        $this->repo = $repo;
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $filters = $request->get('filters', []);
+        $columns = $request->get('columns', []);
+        $sorts = $request->get('sorts', []);
+        $list = $this->repo->advancePaginate($request->get('per_page', Pagination::DEFAULT_PER_PAGE), $filters, $sorts, $columns, []);
+
+        return response()->successWithAdminPagination([
+            'list' => UserAdminResource::collection($list),
+            'paginate' => $list
+        ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        if (!($validator = new CreateUserRequest())->validate($request)) {
+            return response()->error($validator->getValidationErrors());
+        }
+        $inputs = $validator->getValidated();
+        $item = $this->repo->create($inputs);
+        return response()->success([
+            'item' => UserAdminResource::make($item),
+        ]);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        $item = $this->repo->find($id);
+        if (!$item) {
+            return response()->error(__('messages.response.NotFound'));
+        }
+
+        return response()->success([
+            'item' => UserAdminResource::make($item),
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        if (!($validator = new UpdateUserRequest())->validate($request)) {
+            return response()->error($validator->getValidationErrors());
+        }
+        $model = $this->repo->find($id);
+        if (!$model) {
+            return response()->error(__('messages.response.NotFound'));
+        }
+        $inputs = $validator->getValidated();
+        $item = $this->repo->update($inputs, $id);
+
+        return response()->success([
+            'item' => UserAdminResource::make($item),
+        ]);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $model = $this->repo->find($id);
+        if (!$model) {
+            return response()->error(__('messages.response.NotFound'));
+        }
+        $model->delete();
+
+        return response()->success([
+            'message' => __('messages.response.success'),
+        ]);
+    }
+}

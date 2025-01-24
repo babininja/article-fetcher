@@ -1,0 +1,31 @@
+<?php
+
+namespace $NAMESPACE$\$CLASS_NAME$;
+
+use App\Models\$CLASS_NAME$;
+use App\Repositories\Contracts\$CLASS_NAME$\$CLASS_NAME$RepositoryInterface;
+use App\Repositories\Models\BaseRepository;
+
+class $CLASS_NAME$Repository extends BaseRepository implements $CLASS_NAME$RepositoryInterface
+{
+    /**
+     * @var array
+     */
+    protected $fieldSearchable = [];
+
+    /**
+     * @return array
+     */
+    public function getFieldsSearchable(): array
+    {
+        return $this->fieldSearchable;
+    }
+
+    /**
+     * @return string
+     */
+    public function model(): string
+    {
+        return $CLASS_NAME$::class;
+    }
+}
